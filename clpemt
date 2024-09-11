@@ -14,8 +14,17 @@ detect_package_manager() {
     fi
 }
 
+# Display Title
+display_title() {
+    clear
+    echo "====================="
+    echo "   CLPE Multitool    "
+    echo "====================="
+}
+
 # System Monitoring
 system_monitoring() {
+    display_title
     case $1 in
         1) neofetch ;;
         2) df -h ;;
@@ -28,6 +37,7 @@ system_monitoring() {
 
 # Network Tools
 network_tools() {
+    display_title
     case $1 in
         1) ip a ;;
         2) read -p "Host to ping: " h; ping -c 4 $h ;;
@@ -39,6 +49,7 @@ network_tools() {
 
 # File Management
 file_management() {
+    display_title
     case $1 in
         1) read -p "Directory to backup: " d; read -p "Destination: " dst; tar -czvf $dst $d ;;
         2) read -p "Backup file: " f; read -p "Restore to: " r; tar -xzvf $f -C $r ;;
@@ -51,22 +62,23 @@ file_management() {
 
 # System Management (based on package manager)
 system_management() {
+    display_title
     case $1 in
-        1)
+        1) 
             case $PM in
                 apt) sudo apt update && sudo apt upgrade -y ;;
                 dnf) sudo dnf update -y ;;
                 pacman) sudo pacman -Syu ;;
             esac
             ;;
-        2)
+        2) 
             case $PM in
                 apt) sudo apt clean ;;
                 dnf) sudo dnf clean all ;;
                 pacman) sudo pacman -Scc ;;
             esac
             ;;
-        3)
+        3) 
             case $PM in
                 apt) sudo apt autoremove ;;
                 dnf) sudo dnf autoremove ;;
@@ -79,6 +91,7 @@ system_management() {
 
 # Security Tools
 security_tools() {
+    display_title
     case $1 in
         1) sudo firewall-cmd --state ;;
         2) sudo firewall-cmd --add-service=ssh --permanent; sudo firewall-cmd --reload ;;
@@ -89,6 +102,7 @@ security_tools() {
 
 # Main Menu
 main_menu() {
+    display_title
     echo -e "Categories:\n1) System Monitoring\n2) Network Tools\n3) File Management\n4) System Management\n5) Security Tools"
     read -p "Choose a category: " cat
     case $cat in
