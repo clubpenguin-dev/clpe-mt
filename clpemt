@@ -1,230 +1,106 @@
 #!/bin/bash
 
-# -------------- System Monitoring Functions --------------
-# System Info using neofetch
-function system_info() {
-    neofetch
+# Detect package manager
+detect_package_manager() {
+    if command -v apt &> /dev/null; then
+        PM="apt"
+    elif command -v dnf &> /dev/null; then
+        PM="dnf"
+    elif command -v pacman &> /dev/null; then
+        PM="pacman"
+    else
+        echo "Unsupported package manager. Supported: apt, dnf, pacman."
+        exit 1
+    fi
 }
 
-# Disk Usage
-function disk_usage() {
-    df -h
-}
-
-# Memory Usage
-function memory_usage() {
-    free -h
-}
-
-# CPU Usage
-function cpu_usage() {
-    top -bn1 | grep "Cpu(s)"
-}
-
-# -------------- Network Tools Functions --------------
-# Network Info
-function network_info() {
-    ip a
-}
-
-# Ping a Host
-function ping_host() {
-    read -p "Enter the host to ping: " host
-    ping -c 4 $host
-}
-
-# Speed Test (requires speedtest-cli)
-function speed_test() {
-    speedtest-cli
-}
-
-# Check Open Ports
-function check_open_ports() {
-    ss -tuln
-}
-
-# -------------- File Management Functions --------------
-# Create Backup
-function create_backup() {
-    read -p "Enter the directory you want to backup: " directory
-    read -p "Enter the destination for the backup: " destination
-    tar -czvf $destination $directory
-}
-
-# Restore Backup
-function restore_backup() {
-    read -p "Enter the backup file to restore: " backup_file
-    read -p "Enter the destination to extract the backup: " destination
-    tar -xzvf $backup_file -C $destination
-}
-
-# Compress File
-function compress_file() {
-    read -p "Enter the file to compress: " file
-    read -p "Enter the destination compressed file (e.g., file.tar.gz): " destination
-    tar -czvf $destination $file
-}
-
-# Decompress File
-function decompress_file() {
-    read -p "Enter the compressed file to decompress: " file
-    read -p "Enter the destination directory: " directory
-    tar -xzvf $file -C $directory
-}
-
-# Find Large Files
-function find_large_files() {
-    read -p "Enter the directory to search: " directory
-    find $directory -type f -exec du -h {} + | sort -rh | head -n 10
-}
-
-# -------------- System Management Functions --------------
-# System Update (Ubuntu/Debian)
-function update_system() {
-    sudo apt update && sudo apt upgrade -y
-}
-
-# Clear Cache (Ubuntu/Debian)
-function clear_cache() {
-    sudo apt-get clean
-}
-
-# Remove Old Kernels (Ubuntu)
-function remove_old_kernels() {
-    sudo apt-get autoremove --purge
-}
-
-# Check Temperature (requires lm-sensors)
-function check_temperature() {
-    sensors
-}
-
-# -------------- Security Tools Functions --------------
-# Firewall Status
-function firewall_status() {
-    sudo ufw status
-}
-
-# Enable Firewall
-function enable_firewall() {
-    sudo ufw enable
-}
-
-# Disable Firewall
-function disable_firewall() {
-    sudo ufw disable
-}
-
-# -------------- Category Selection --------------
-function select_category() {
-    echo "Choose a category:"
-    echo "1) System Monitoring"
-    echo "2) Network Tools"
-    echo "3) File Management"
-    echo "4) System Management"
-    echo "5) Security Tools"
-    read -p "Enter the number of the category you want to explore: " category_choice
-
-    case $category_choice in
-        1) system_monitoring_tools ;;
-        2) network_tools ;;
-        3) file_management_tools ;;
-        4) system_management_tools ;;
-        5) security_tools ;;
-        *) echo "Invalid choice"; select_category ;;
+# System Monitoring
+system_monitoring() {
+    case $1 in
+        1) neofetch ;;
+        2) df -h ;;
+        3) free -h ;;
+        4) top -bn1 | grep "Cpu(s)" ;;
+        5) sensors ;;
+        *) echo "Invalid option" ;;
     esac
 }
 
-# -------------- Tool Selection per Category --------------
-# System Monitoring Tools Menu
-function system_monitoring_tools() {
-    echo "System Monitoring Tools:"
-    echo "1) System Info"
-    echo "2) Disk Usage"
-    echo "3) Memory Usage"
-    echo "4) CPU Usage"
-    echo "5) Check Temperature"
-    read -p "Enter the number of the tool you want to use: " tool_choice
-
-    case $tool_choice in
-        1) system_info ;;
-        2) disk_usage ;;
-        3) memory_usage ;;
-        4) cpu_usage ;;
-        5) check_temperature ;;
-        *) echo "Invalid choice"; system_monitoring_tools ;;
+# Network Tools
+network_tools() {
+    case $1 in
+        1) ip a ;;
+        2) read -p "Host to ping: " h; ping -c 4 $h ;;
+        3) speedtest-cli ;;
+        4) ss -tuln ;;
+        *) echo "Invalid option" ;;
     esac
 }
 
-# Network Tools Menu
-function network_tools() {
-    echo "Network Tools:"
-    echo "1) Network Info"
-    echo "2) Ping a Host"
-    echo "3) Speed Test"
-    echo "4) Check Open Ports"
-    read -p "Enter the number of the tool you want to use: " tool_choice
-
-    case $tool_choice in
-        1) network_info ;;
-        2) ping_host ;;
-        3) speed_test ;;
-        4) check_open_ports ;;
-        *) echo "Invalid choice"; network_tools ;;
+# File Management
+file_management() {
+    case $1 in
+        1) read -p "Directory to backup: " d; read -p "Destination: " dst; tar -czvf $dst $d ;;
+        2) read -p "Backup file: " f; read -p "Restore to: " r; tar -xzvf $f -C $r ;;
+        3) read -p "File to compress: " f; read -p "Destination (file.tar.gz): " dst; tar -czvf $dst $f ;;
+        4) read -p "Compressed file: " f; read -p "Extract to: " d; tar -xzvf $f -C $d ;;
+        5) read -p "Directory: " d; find $d -type f -exec du -h {} + | sort -rh | head -n 10 ;;
+        *) echo "Invalid option" ;;
     esac
 }
 
-# File Management Tools Menu
-function file_management_tools() {
-    echo "File Management Tools:"
-    echo "1) Create Backup"
-    echo "2) Restore Backup"
-    echo "3) Compress File"
-    echo "4) Decompress File"
-    echo "5) Find Large Files"
-    read -p "Enter the number of the tool you want to use: " tool_choice
-
-    case $tool_choice in
-        1) create_backup ;;
-        2) restore_backup ;;
-        3) compress_file ;;
-        4) decompress_file ;;
-        5) find_large_files ;;
-        *) echo "Invalid choice"; file_management_tools ;;
+# System Management (based on package manager)
+system_management() {
+    case $1 in
+        1)
+            case $PM in
+                apt) sudo apt update && sudo apt upgrade -y ;;
+                dnf) sudo dnf update -y ;;
+                pacman) sudo pacman -Syu ;;
+            esac
+            ;;
+        2)
+            case $PM in
+                apt) sudo apt clean ;;
+                dnf) sudo dnf clean all ;;
+                pacman) sudo pacman -Scc ;;
+            esac
+            ;;
+        3)
+            case $PM in
+                apt) sudo apt autoremove ;;
+                dnf) sudo dnf autoremove ;;
+                pacman) sudo pacman -Rns $(pacman -Qdtq) ;;
+            esac
+            ;;
+        *) echo "Invalid option" ;;
     esac
 }
 
-# System Management Tools Menu
-function system_management_tools() {
-    echo "System Management Tools:"
-    echo "1) System Update"
-    echo "2) Clear Cache"
-    echo "3) Remove Old Kernels"
-    read -p "Enter the number of the tool you want to use: " tool_choice
-
-    case $tool_choice in
-        1) update_system ;;
-        2) clear_cache ;;
-        3) remove_old_kernels ;;
-        *) echo "Invalid choice"; system_management_tools ;;
+# Security Tools
+security_tools() {
+    case $1 in
+        1) sudo firewall-cmd --state ;;
+        2) sudo firewall-cmd --add-service=ssh --permanent; sudo firewall-cmd --reload ;;
+        3) sudo firewall-cmd --remove-service=ssh --permanent; sudo firewall-cmd --reload ;;
+        *) echo "Invalid option" ;;
     esac
 }
 
-# Security Tools Menu
-function security_tools() {
-    echo "Security Tools:"
-    echo "1) Firewall Status"
-    echo "2) Enable Firewall"
-    echo "3) Disable Firewall"
-    read -p "Enter the number of the tool you want to use: " tool_choice
-
-    case $tool_choice in
-        1) firewall_status ;;
-        2) enable_firewall ;;
-        3) disable_firewall ;;
-        *) echo "Invalid choice"; security_tools ;;
+# Main Menu
+main_menu() {
+    echo -e "Categories:\n1) System Monitoring\n2) Network Tools\n3) File Management\n4) System Management\n5) Security Tools"
+    read -p "Choose a category: " cat
+    case $cat in
+        1) echo -e "1) System Info\n2) Disk Usage\n3) Memory Usage\n4) CPU Usage\n5) Check Temperature"; read -p "Choose tool: " tool; system_monitoring $tool ;;
+        2) echo -e "1) Network Info\n2) Ping\n3) Speed Test\n4) Open Ports"; read -p "Choose tool: " tool; network_tools $tool ;;
+        3) echo -e "1) Backup\n2) Restore\n3) Compress\n4) Decompress\n5) Find Large Files"; read -p "Choose tool: " tool; file_management $tool ;;
+        4) echo -e "1) System Update\n2) Clear Cache\n3) Remove Old Kernels"; read -p "Choose tool: " tool; system_management $tool ;;
+        5) echo -e "1) Firewall Status\n2) Enable SSH\n3) Disable SSH"; read -p "Choose tool: " tool; security_tools $tool ;;
+        *) echo "Invalid category" ;;
     esac
 }
 
-# -------------- Main Script Execution --------------
-select_category
+# Run
+detect_package_manager
+main_menu
