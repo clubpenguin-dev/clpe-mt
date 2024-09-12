@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# dont touch add later
+# Load configuration
 load_config() {
-    if [[ -f config.cfg ]]; then
-        source config.cfg
+    CONFIG_FILE="$HOME/config.cfg"
+    if [[ -f "$CONFIG_FILE" ]]; then
+        source "$CONFIG_FILE"
     fi
 }
 
-# package manger detector please if you have one that isnt one of these managers add it please im not going to these are the most common ones and i added dnf as i use fedora
+# please add if you have invalid package manager
 detect_package_manager() {
     if [[ -n "$DEFAULT_PM" ]]; then
         PM=$DEFAULT_PM
@@ -25,7 +26,7 @@ detect_package_manager() {
     fi
 }
 
-# yippe title
+# Display Title
 display_title() {
     clear
     echo "====================="
@@ -33,9 +34,14 @@ display_title() {
     echo "====================="
 }
 
+# spaghetti spaghetti spaghetti i love spaghetti
+display_menu() {
+    echo -e "Categories:\n1) System Monitoring\n2) Network Tools\n3) File Management\n4) Package Management\n5) Git Tools\n6) System Management\n7) Security Tools\n8) Web Tools\n0) Exit\nh) Help"
+}
 
+# Functions (same as before)
 
-# help menu
+# help(menu) me
 display_help() {
     echo "CLPE Multitool Help Menu"
     echo "======================="
@@ -81,7 +87,7 @@ display_help() {
     echo "0) Exit: Exit the script."
 }
 
-# end me plz(can someone random plzzzz fix not me im not fixing the code to make it readable)
+# end me ples
 main_menu() {
     while true; do
         display_title
@@ -104,7 +110,7 @@ main_menu() {
     done
 }
 
-# runs shit
+# Run shit
 load_config
 detect_package_manager
 main_menu
