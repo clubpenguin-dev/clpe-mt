@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Load configuration
+# dont touch add later
 load_config() {
     if [[ -f config.cfg ]]; then
         source config.cfg
     fi
 }
 
-# Detect package manager
+# package manger detector please if you have one that isnt one of these managers add it please im not going to these are the most common ones and i added dnf as i use fedora
 detect_package_manager() {
     if [[ -n "$DEFAULT_PM" ]]; then
         PM=$DEFAULT_PM
@@ -25,7 +25,7 @@ detect_package_manager() {
     fi
 }
 
-# Display Title
+# yippe title
 display_title() {
     clear
     echo "====================="
@@ -33,9 +33,9 @@ display_title() {
     echo "====================="
 }
 
-# Functions (same as before)
 
-# Display Help Menu
+
+# help menu
 display_help() {
     echo "CLPE Multitool Help Menu"
     echo "======================="
@@ -81,7 +81,7 @@ display_help() {
     echo "0) Exit: Exit the script."
 }
 
-# Main Menu Loop
+# end me plz(can someone random plzzzz fix not me im not fixing the code to make it readable)
 main_menu() {
     while true; do
         display_title
@@ -104,7 +104,7 @@ main_menu() {
     done
 }
 
-# Run
+# runs shit
 load_config
 detect_package_manager
 main_menu
