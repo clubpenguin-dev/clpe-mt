@@ -1,27 +1,16 @@
 #!/bin/bash
 
-# Load configuration
-load_config() {
-    if [[ -f config.cfg ]]; then
-        source config.cfg
-    fi
-}
-
 # Detect package manager
 detect_package_manager() {
-    if [[ -n "$DEFAULT_PM" ]]; then
-        PM=$DEFAULT_PM
+    if command -v apt &> /dev/null; then
+        PM="apt"
+    elif command -v dnf &> /dev/null; then
+        PM="dnf"
+    elif command -v pacman &> /dev/null; then
+        PM="pacman"
     else
-        if command -v apt &> /dev/null; then
-            PM="apt"
-        elif command -v dnf &> /dev/null; then
-            PM="dnf"
-        elif command -v pacman &> /dev/null; then
-            PM="pacman"
-        else
-            echo "Unsupported package manager."
-            exit 1
-        fi
+        echo "Unsupported package manager."
+        exit 1
     fi
 }
 
@@ -33,58 +22,95 @@ display_title() {
     echo "====================="
 }
 
-# Functions (same as before)
+# Functions
+system_monitoring() {
+    case $1 in
+        1) neofetch ;;
+        2) df -h ;;
+        3) free -h ;;
+        4) top -bn1 | grep "Cpu(s)" ;;
+        5) sensors ;;
+        *) echo "Invalid option" ;;
+    esac
+}
 
-# Display Help Menu
-display_help() {
-    echo "CLPE Multitool Help Menu"
-    echo "======================="
-    echo "1) System Monitoring"
-    echo "   1) System Info: Display system information using neofetch."
-    echo "   2) Disk Usage: Show disk usage of mounted filesystems."
-    echo "   3) Memory Usage: Display memory usage statistics."
-    echo "   4) CPU Usage: Show CPU usage information."
-    echo "   5) Check Temperature: Check system temperature."
-    echo "2) Network Tools"
-    echo "   1) Network Info: Display network interfaces and IP addresses."
-    echo "   2) Ping: Ping a specified host."
-    echo "   3) Speed Test: Run a speed test to measure network performance."
-    echo "   4) Open Ports: List open ports on the system."
-    echo "3) File Management"
-    echo "   1) Backup: Create a backup of a directory."
-    echo "   2) Restore: Restore a backup to a specified directory."
-    echo "   3) Compress: Compress a file into a .tar.gz archive."
-    echo "   4) Decompress: Decompress a .tar.gz archive."
-    echo "   5) Find Large Files: List the largest files in a directory."
-    echo "4) Package Management"
-    echo "   1) Search Package: Search for a package in the package manager."
-    echo "   2) Install Package: Install a package using the package manager."
-    echo "5) Git Tools"
-    echo "   1) Git Status: Show the status of the Git repository."
-    echo "   2) Git Pull: Pull changes from the remote repository."
-    echo "   3) Git Push: Push changes to the remote repository."
-    echo "   4) Git Log: Show the Git commit history."
-    echo "   5) Git Branch: List Git branches."
-    echo "   6) Checkout Branch: Checkout a specific Git branch."
-    echo "6) System Management"
-    echo "   1) System Update: Update the system."
-    echo "   2) Clear Cache: Clear the package manager cache."
-    echo "   3) Remove Old Kernels: Remove old kernels from the system."
-    echo "7) Security Tools"
-    echo "   1) Firewall Status: Show the status of the firewall."
-    echo "   2) Enable SSH: Enable SSH service in the firewall."
-    echo "   3) Disable SSH: Disable SSH service in the firewall."
-    echo "8) Web Tools"
-    echo "   1) Google Search: Perform a Google search and open in the browser."
-    echo "   2) Spotify Search: Perform a Spotify search and open in the browser."
-    echo "   3) YouTube Search: Perform a YouTube search and open in the browser."
-    echo "0) Exit: Exit the script."
+network_tools() {
+    case $1 in
+        1) ip a ;;
+        2) read -p "Host to ping: " h; ping -c 4 $h ;;
+        3) speedtest-cli ;;
+        4) ss -tuln ;;
+        *) echo "Invalid option" ;;
+    esac
+}
+
+file_management() {
+    case $1 in
+        1) read -p "Directory to backup: " d; read -p "Destination: " dst; tar -czvf $dst $d ;;
+        2) read -p "Backup file: " f; read -p "Restore to: " r; tar -xzvf $f -C $r ;;
+        3) read -p "File to compress: " f; read -p "Destination (file.tar.gz): " dst; tar -czvf $dst $f ;;
+        4) read -p "Compressed file: " f; read -p "Extract to: " d; tar -xzvf $f -C $d ;;
+        5) read -p "Directory: " d; find $d -type f -exec du -h {} + | sort -rh | head -n 10 ;;
+        *) echo "Invalid option" ;;
+    esac
+}
+
+package_management() {
+    case $1 in
+        1) read -p "Package to search: " pkg; $PM search $pkg ;;
+        2) read -p "Package to install: " pkg; sudo $PM install $pkg ;;
+        *) echo "Invalid option" ;;
+    esac
+}
+
+git_tools() {
+    case $1 in
+        1) git status ;;
+        2) git pull ;;
+        3) git push ;;
+        4) git log ;;
+        5) git branch ;;
+        6) read -p "Branch name to checkout: " branch; git checkout $branch ;;
+        *) echo "Invalid option" ;;
+    esac
+}
+
+system_management() {
+    case $1 in
+        1) sudo $PM update ;;
+        2) sudo $PM clean ;;
+        3) sudo $PM autoremove ;;
+        *) echo "Invalid option" ;;
+    esac
+}
+
+security_tools() {
+    case $1 in
+        1) sudo firewall-cmd --state ;;
+        2) sudo firewall-cmd --add-service=ssh --permanent; sudo firewall-cmd --reload ;;
+        3) sudo firewall-cmd --remove-service=ssh --permanent; sudo firewall-cmd --reload ;;
+        *) echo "Invalid option" ;;
+    esac
+}
+
+web_tools() {
+    case $1 in
+        1) read -p "Search query: " query; xdg-open "https://www.google.com/search?q=$query" ;;
+        2) read -p "Spotify search query: " query; xdg-open "https://open.spotify.com/search/$query" ;;
+        3) read -p "YouTube search query: " query; xdg-open "https://www.youtube.com/results?search_query=$query" ;;
+        *) echo "Invalid option" ;;
+    esac
+}
+
+# Display Menu
+display_menu() {
+    display_title
+    echo -e "Categories:\n1) System Monitoring\n2) Network Tools\n3) File Management\n4) Package Management\n5) Git Tools\n6) System Management\n7) Security Tools\n8) Web Tools\n0) Exit"
 }
 
 # Main Menu Loop
 main_menu() {
     while true; do
-        display_title
         display_menu
         read -p "Choose a category: " cat
         case $cat in
@@ -97,7 +123,6 @@ main_menu() {
             7) echo -e "1) Firewall Status\n2) Enable SSH\n3) Disable SSH"; read -p "Choose tool: " tool; security_tools $tool ;;
             8) echo -e "1) Google Search\n2) Spotify Search\n3) YouTube Search"; read -p "Choose tool: " tool; web_tools $tool ;;
             0) exit 0 ;;
-            h) display_help ;; # Display help menu
             *) echo "Invalid category" ;;
         esac
         read -p "Press Enter to return to the main menu or Ctrl+C to exit."
@@ -105,6 +130,5 @@ main_menu() {
 }
 
 # Run
-load_config
 detect_package_manager
 main_menu
