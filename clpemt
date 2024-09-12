@@ -2,13 +2,12 @@
 
 # Load configuration
 load_config() {
-    CONFIG_FILE="$HOME/config.cfg"
-    if [[ -f "$CONFIG_FILE" ]]; then
-        source "$CONFIG_FILE"
+    if [[ -f config.cfg ]]; then
+        source config.cfg
     fi
 }
 
-# please add if you have invalid package manager
+# Detect package manager
 detect_package_manager() {
     if [[ -n "$DEFAULT_PM" ]]; then
         PM=$DEFAULT_PM
@@ -34,14 +33,9 @@ display_title() {
     echo "====================="
 }
 
-# spaghetti spaghetti spaghetti i love spaghetti
-display_menu() {
-    echo -e "Categories:\n1) System Monitoring\n2) Network Tools\n3) File Management\n4) Package Management\n5) Git Tools\n6) System Management\n7) Security Tools\n8) Web Tools\n0) Exit\nh) Help"
-}
-
 # Functions (same as before)
 
-# help(menu) me
+# Display Help Menu
 display_help() {
     echo "CLPE Multitool Help Menu"
     echo "======================="
@@ -87,7 +81,7 @@ display_help() {
     echo "0) Exit: Exit the script."
 }
 
-# end me ples
+# Main Menu Loop
 main_menu() {
     while true; do
         display_title
@@ -110,7 +104,7 @@ main_menu() {
     done
 }
 
-# Run shit
+# Run
 load_config
 detect_package_manager
 main_menu
